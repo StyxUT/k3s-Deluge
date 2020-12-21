@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: deluge
+  name: deluge
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      app: deluge
+  template:
+    metadata:
+      labels:
+        app: deluge
+    spec:
+      containers:
+      - env:
+        - name: PUID
+          value: '1000'
+        - name: PGID
+          value: '1000'
+        - name: TZ
+          value: America/Denver
+        - name: UMASK_SET
+          value: '022'
+        - name: DELUGE_LOGLEVEL
+          value: error
+        image: ghcr.io/linuxserver/deluge
+        imagePullPolicy: Always
+        name: deluge
+        volumeMounts:
+        - mountPath: /config
+        - subpath: /deluge/config
+          name: deluge
+        - mountPath: /downloads
+        - subpath: /deluge/downloads
+          name: deluge
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - name: deluge
+        persistentVolumeClaim:
+          claimName: synology-deluge
+
+
+
